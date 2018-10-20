@@ -37,9 +37,9 @@ public class Key {
 
 and replace TOKEN with whatever your token is. To get your token, go to [Discord's Developer Documentation](https://discordapp.com/developers/docs/intro) and create a application, then a bot, then get your token. To run the bot, either open this project in your IDE of choice, let it download the dependencies and then hit the run button. You can also use the command line.
 
-1. Navigate to the directory that contains the pom.xml file.
-1. Install Maven: `sudo apt-get install maven`
-1. To find the directory Maven is installed in, run `mvn --version` This should be outputted:
+* Navigate to the directory that contains the pom.xml file.
+* Install Maven: `sudo apt-get install maven`
+* To find the directory Maven is installed in, run `mvn --version` This should be outputted:
 
  ```
 Apache Maven 3.5.0
@@ -50,6 +50,6 @@ Default locale: en_CA, platform encoding: UTF-8
 OS name: "linux", version: "4.13.0-45-generic", arch: "amd64", family: "unix"
 ```
 You are looking for `Maven home:`. What comes after it should replace `PATH/TO/MAVEN` for the next step
-1. Run `mvn exec:java -Dexec.mainClass="core.App" -s "PATH/TO/MAVEN/conf/settings.xml"`
-1. You are now running the bot!
-1. After you make some cool changes, commit it to your repository and hit me with a pull request!
+* Run `mvn exec:java -Dexec.mainClass="core.App" -s "PATH/TO/MAVEN/conf/settings.xml"`
+* You are now running the bot!
+* After you make some cool changes, commit it to your repository and hit me with a pull request!
