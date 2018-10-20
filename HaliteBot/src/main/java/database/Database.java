@@ -11,6 +11,8 @@ import api.DiscordUser;
 import api.User;
 import com.google.gson.*;
 
+import constants.Constants;
+import core.App;
 import util.StringUtil;
 
 public class Database {
@@ -24,7 +26,7 @@ public class Database {
             String raw = StringUtil.readFileAsString(file.getPath());
             database = new JsonParser().parse(raw).getAsJsonObject();
             for(String key : database.keySet()) {
-                DiscordUser user = new DiscordUser(key,database.get(key).getAsString());
+                DiscordUser user = new DiscordUser(database.get(key).getAsString(), key);
                 users.add(user);
             }
             System.out.println("Database parsed succesfully.");
@@ -62,7 +64,7 @@ public class Database {
     }
 
     public static void removeUser(String userId) {
-        for(int i = 0; i < users.size(); i++) {
+        for(int i = users.size() - 1; i >= 0 ; i--) {
             DiscordUser u = users.get(i);
             String id = u.discord_id;
             if(id.equals(userId)) {
@@ -100,19 +102,27 @@ public class Database {
         StringUtil.writeToFile(database.toString(), f.getPath());
     }
 
+
+    //Detects if the discord_id is the halite_id, and flips it.
+    @Deprecated
+    public static void sanitise(){
+        for(int i = users.size() - 1; i >= 0; i--){
+            if(users.get(i).discord_id.length() < 5){
+                String temp = users.get(i).discord_id;
+                users.get(i).discord_id = users.get(i).halite_id;
+                users.get(i).halite_id = temp;
+            }
+        }
+    }
+
     public static void save(File f) {
+
+        database = new JsonObject();
+
         for(DiscordUser u : users) {
             database.addProperty(u.getDiscord_id(), u.halite_id);
         }
-        Set<String> keys = new TreeSet<String>();
-        for(String key : database.keySet()) {
-            keys.add(key);
-        }
-        for(String key : keys) {
-            if(!hasUser(key)) {
-                database.remove(key);
-            }
-        }
+
         StringUtil.writeToFile(database.toString(), f.getPath());
     }
 

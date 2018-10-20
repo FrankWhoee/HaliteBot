@@ -5,6 +5,7 @@ import api.Halite;
 import constants.Constants;
 import constants.Key;
 import database.Database;
+import emojis.EmojiUtil;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.JDA;
@@ -26,6 +27,7 @@ public class App extends ListenerAdapter{
         jda.getPresence().setGame(Game.of(Game.GameType.DEFAULT, Constants.PREFIX + "help"));
 
         Database.parseDB(Constants.database, Constants.databaseParent);
+        EmojiUtil.parseEmojis();
 
     }
 
@@ -34,9 +36,10 @@ public class App extends ListenerAdapter{
         //Objects
         Message objMsg = evt.getMessage();
         MessageChannel objMsgCh = evt.getTextChannel();
-        if(evt.getPrivateChannel() != null){
-
+        if(evt.getChannelType().equals(ChannelType.PRIVATE)){
+            objMsgCh = evt.getPrivateChannel();
         }
+
         User objUser = evt.getAuthor();
         Member objMember = evt.getMember();
         Guild objGuild = evt.getGuild();
@@ -67,7 +70,13 @@ public class App extends ListenerAdapter{
 
         if (command.equals("help")) {
             objMsgCh.sendMessage(Constants.HELP_MESSAGE).queue();
-        } else if (command.equals("who")) {
+        } else if (command.equals("kill") && Constants.adminIds.contains(objUser.getIdLong())) {
+            eb.setColor(Constants.WARNING_RED);
+            eb.setTitle("Shutting down...");
+            objMsgCh.sendMessage(eb.build()).queue();
+            jda.shutdown();
+            return;
+        }else if (command.equals("who")) {
 
             String user_id = input.trim();
 
@@ -78,19 +87,67 @@ public class App extends ListenerAdapter{
             }catch(Exception e){}
 
             if(!isHaliteID){
-                Member m = objGuild.getMembersByEffectiveName(input,true).get(0);
-                try{
-                    user_id = Database.getUser(m.getUser().getId()).halite_id;
-                }catch(Exception e){
-                    eb.setColor(Constants.WARNING_RED);
-                    eb.setTitle("You are not registered. Type !register user_id where user_id is your Halite ID to register.");
-                    objMsgCh.sendMessage(eb.build()).queue();
-                    return;
+                if(evt.getChannelType().equals(ChannelType.PRIVATE)){
+                    try {
+                        user_id = Database.getUser(jda.getUsersByName(input, true).get(0).getId()).halite_id;
+                    }catch(IndexOutOfBoundsException iobe){
+                        eb.setColor(Constants.WARNING_RED);
+                        eb.setTitle("I couldn't find " + input + ". This user does not exist.");
+                        objMsgCh.sendMessage(eb.build()).queue();
+                        return;
+                    }catch(NullPointerException npe){
+                        eb.setColor(Constants.WARNING_RED);
+                        eb.setTitle("I couldn't find " + input + ". This user is not registered.");
+                        objMsgCh.sendMessage(eb.build()).queue();
+                        return;
+                    }catch(Exception e){
+                        eb.setColor(Constants.WARNING_RED);
+                        eb.setTitle("An unknown error occurred. Please notify @FrankWhoee, and send this:");
+                        eb.setDescription("```" + e.getStackTrace().toString() + "```");
+                        objMsgCh.sendMessage(eb.build()).queue();
+                        return;
+                    }
+                }else{
+
+                    if(objMsg.getMentionedMembers().size() > 0){
+                        Member m;
+                        if(objMsg.getMentionedMembers().size() == 1){
+                            m = objMsg.getMentionedMembers().get(0);
+                        }else{
+                            eb.setColor(Constants.WARNING_RED);
+                            eb.setTitle("You tagged too many people! Just tag one person, in the format `!who @mention`. For example, `!who @FrankWhoee`");
+                            objMsgCh.sendMessage(eb.build()).queue();
+                            return;
+                        }
+                        try{
+                            user_id = Database.getUser(m.getUser().getId()).halite_id;
+                        }catch(Exception e){
+                            eb.setColor(Constants.WARNING_RED);
+                            eb.setTitle("You are not registered. Type !register user_id where user_id is your Halite ID to register.");
+                            objMsgCh.sendMessage(eb.build()).queue();
+                            return;
+                        }
+                    }else{
+                        Member m;
+                        try {
+                            m = objGuild.getMembersByEffectiveName(input, true).get(0);
+                        }catch(Exception e){
+                            eb.setColor(Constants.WARNING_RED);
+                            eb.setTitle("I couldn't find " + input + " in this server! Are you sure you typed the name right?");
+                            objMsgCh.sendMessage(eb.build()).queue();
+                            return;
+                        }
+                        try{
+                            user_id = Database.getUser(m.getUser().getId()).halite_id;
+                        }catch(Exception e){
+                            eb.setColor(Constants.WARNING_RED);
+                            eb.setTitle("You are not registered. Type !register user_id where user_id is your Halite ID to register.");
+                            objMsgCh.sendMessage(eb.build()).queue();
+                            return;
+                        }
+                    }
                 }
             }
-
-
-
             try {
                 user_info = Halite.getUserInfo(user_id);
             } catch (Exception e) {
@@ -111,9 +168,6 @@ public class App extends ListenerAdapter{
                 objMsgCh.sendMessage(eb.build()).queue();
             }
 
-
-
-
             eb.setColor(Constants.HALITE_BLUE);
 
             eb.setTitle(user_info.getUsername(), "https://halite.io/user/?user_id=" + user_info.getUser_id());
@@ -121,7 +175,9 @@ public class App extends ListenerAdapter{
 
             eb.addField("Rank", "" + user_info.getRank(), true);
             eb.addField("Tier", "" + Constants.tierEmojis.get(user_info.getTier()), true);
-            eb.addField("Country", user_info.getCountry_code(), true);
+
+            eb.addField("Country", EmojiUtil.getEmojiByAlias(Constants.iso3ToIso2(user_info.getCountry_code()).toLowerCase()), true);
+
             eb.addField("Level", user_info.getLevel(), true);
             eb.addField("µ", "" + user_info.getMu(), true);
             eb.addField("σ", "" + user_info.getSigma(), true);
@@ -141,6 +197,7 @@ public class App extends ListenerAdapter{
             objMsgCh.sendMessage(eb.build()).queue();
         } else if (command.equals("register")) {
             DiscordUser du = new DiscordUser(input, objUser.getId());
+
             eb = new EmbedBuilder();
 
             eb.setColor(Constants.HALITE_BLUE);
@@ -150,7 +207,9 @@ public class App extends ListenerAdapter{
                 Halite.getUserInfo(input);
             } catch (Exception e) {
                 eb.setColor(Constants.WARNING_RED);
-                eb.setTitle("Register failed. ID invalid. Please type in the format `!register user_id` where user_id is your Halite id. For example, `!register 216`.");
+                eb.setTitle("Register failed. ID invalid. Please type in the format `!register user_id` where user_id is your Halite id. " +
+                        "For example, `!register 216`. " +
+                        "To find your halite ID, go to http://halite.io/user/?me and get the numbers that follow ?user_id=");
 
                 objMsgCh.sendMessage(eb.build()).queue();
                 return;
@@ -165,8 +224,8 @@ public class App extends ListenerAdapter{
             Database.addUser(du);
             Database.save(Constants.database);
 
-
             objMsgCh.sendMessage(eb.build()).queue();
+            System.out.println(du.halite_id + ", " + du.discord_id);
         } else if (command.equals("me")) {
             user_info = null;
             eb = new EmbedBuilder();
@@ -208,7 +267,7 @@ public class App extends ListenerAdapter{
             eb.setDescription(user_info.getOrganization());
             eb.addField("Rank", "" + user_info.getRank(), true);
             eb.addField("Tier", "" + Constants.tierEmojis.get(user_info.getTier()), true);
-            eb.addField("Country", user_info.getCountry_code(), true);
+            eb.addField("Country", EmojiUtil.getEmojiByAlias(Constants.iso3ToIso2(user_info.getCountry_code()).toLowerCase()), true);
             eb.addField("Level", user_info.getLevel(), true);
             eb.addField("µ", "" + user_info.getMu(), true);
             eb.addField("σ", "" + user_info.getSigma(), true);
@@ -229,8 +288,6 @@ public class App extends ListenerAdapter{
 
             objMsgCh.sendMessage(eb.build()).queue();
         } else if (command.equals("rank")) {
-
-
             String user_id = input;
             if(Database.hasUser(objUser.getId()) && input.trim().equals("")){
                 user_id = Database.getUser(objUser.getId()).halite_id;
