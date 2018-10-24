@@ -348,7 +348,11 @@ public class App extends ListenerAdapter{
             objMsgCh.sendMessage(eb.build()).queue();
         } else if (command.equals("top")) {
             eb = new EmbedBuilder();
-            int size = Integer.parseInt(input.trim());
+
+            int size;
+            if(input.length < 0 || !input.matches("^\\d+$"))
+                size = 1;
+            else size = Integer.parseInt(input.trim());
 
             ArrayList<Integer> top;
             try {
