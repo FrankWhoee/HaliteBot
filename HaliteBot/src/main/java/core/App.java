@@ -349,7 +349,7 @@ public class App extends ListenerAdapter{
         } else if (command.equals("top")) {
             eb = new EmbedBuilder();
             int size;
-            if(null == input || input.length() < 1 || input.trim().length() < 1){
+            if(input == null || input.length() <= 0 || input.trim().length() <= 0){
 		size = Constants.TOP_DEFAULT_LENGTH;
 	    }else{
 		try{
