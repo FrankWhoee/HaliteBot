@@ -9,7 +9,7 @@ import java.util.*;
 public class Constants {
 
     public static final String PREFIX = "!";
-
+    public static final int TOP_DEFAULT_LENGTH = 5;
     //Paths, prefix and version
     public static final String version = "1.0.0";
     public static String jarPath = "";

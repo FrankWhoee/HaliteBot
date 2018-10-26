@@ -348,8 +348,16 @@ public class App extends ListenerAdapter{
             objMsgCh.sendMessage(eb.build()).queue();
         } else if (command.equals("top")) {
             eb = new EmbedBuilder();
-            int size = Integer.parseInt(input.trim());
-
+            int size;
+            if(input == null || input.length() <= 0 || input.trim().length() <= 0){
+		size = Constants.TOP_DEFAULT_LENGTH;
+	    }else{
+		try{
+		    size = Integer.parseInt(input.trim());
+		}catch(NumberFormatException formatException){
+		    size = Constants.TOP_DEFAULT_LENGTH;	
+		}
+	    } 
             ArrayList<Integer> top;
             try {
                 top = Halite.getLeaderboard();
