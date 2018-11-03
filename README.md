@@ -3,17 +3,25 @@
 This is the unofficial Discord bot for the official Halite server for Halite III! 
 
 ## Features 
-It has several useful commands for feeding your Halite addiction: 
-* !who <user_id> This command returns information about the Halite account associated with <user_id>. For example, rank, level, language, games played, country, etc. 
-  * Example: !who 216 
+It has several useful commands for feeding your Halite addiction: <br>
+* `!who <user_id> <top250_username>` This command returns information about the Halite account associated with <user_id> or a <top250_username>. For example, rank, level, language, games played, country, etc. 
+  * Example: `!who 216` 
+  * Example: `!who mlomb`
 
-*!rank <[OFR]user_id> This command returns rank information for the associated <[OFR]user_id> account, like rank, mu, sigma, tier, etc. 
-  * Example: !rank 206 
-* !register <user_id> Tired of typing your user ID all the time? You can register to use OFR functions. OFR means Optional For Registered people. Halite Bot will store your user id in a JSON database so you can check your stats without typing your user id all the time. 
-  * Example: !register 326 
-* !me This command gives you your stats, if you're registered. Less typing! But only if you're registered. 
-* !top <list_size> This handy command tells you who is in the top right now. <list_size> is how many players that you want to list. 
-  * Example: !top 5 
+* `!rank <[OFR]user_id> <top250_username>` This command returns rank information for the associated <[OFR]user_id> or <top250_username> account, like rank, mu, sigma, tier, etc. 
+  * Example: `!rank 206 `
+* `!register <user_id> <top250_username>` Tired of typing your user ID all the time? You can register to use OFR functions. OFR means Optional For Registered people. Halite Bot will store your user id in a JSON database so you can check your stats without typing your user id all the time. 
+  * Example: `!register 326`
+  * Example: `!register reCurs3`
+* `!me` This command gives you your stats, if you're registered. Less typing! But only if you're registered. 
+* `!top <list_size>` This handy command tells you who is in the top right now. <list_size> is how many players that you want to list. Default list size is 5.
+  * Example: `!top 5` 
+* `!challenges <[OFR]user_id> <[OFR]top250_username>` This command returns the active challenges that is assocaited with <user_id> or <top250_username>.
+  * Example: `!challenges 216`
+  * Example: `!challenges Psyho`
+* `!rate <[OFR]user_id> <[OFR]top250_username>` This command returns the rate of games that is assocaited with <user_id> or <top250_username>.
+  * Example: `!rate 216`
+  * Example: `!rate Psyho`
 ## Contributing 
 If you, for some reason want to contribute to the mess of a codebase that this is, you'll need to clone this repository, and create a Key.java file in the constants package, located in src/main/constants/ directory. When you are in it, paste this in:
 ```java
