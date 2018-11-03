@@ -1,5 +1,6 @@
 # HaliteBot
-This is the unofficial, but used Discord bot for the official Halite server for Halite III! 
+![Screenshot](Assets/Screenshot.jpg)
+This is the unofficial Discord bot for the official Halite server for Halite III! 
 
 ## Features 
 It has several useful commands for feeding your Halite addiction: 
